@@ -1,0 +1,62 @@
+public class OrdemServico {
+
+    private static final int MAX_SERVICOS = 10;
+
+    private String nomeCliente;
+    private Veiculo veiculo;
+    private Servico[] servicos;
+    private int quantidadeServicos;
+
+    public OrdemServico(String nomeCliente, Veiculo veiculo) {
+        this.nomeCliente = nomeCliente;
+        this.veiculo = veiculo;
+        this.servicos = new Servico[MAX_SERVICOS];
+        this.quantidadeServicos = 0;
+    }
+
+    public String getNomeCliente() {
+        return nomeCliente;
+    }
+
+    public Veiculo getVeiculo() {
+        return veiculo;
+    }
+
+    /**
+     * Adiciona um serviço a ordem, respeitando o tamanho maximo do array.
+     * Retorna true se o serviço foi adicionado, false caso a capacidade
+     * maxima ja tenha sido atingida.
+     */
+    public boolean adicionarServico(Servico servico) {
+        if (quantidadeServicos >= MAX_SERVICOS) {
+            System.out.println("Nao e possivel adicionar mais servicos: capacidade maxima atingida.");
+            return false;
+        }
+        servicos[quantidadeServicos] = servico;
+        quantidadeServicos++;
+        return true;
+    }
+
+    public double calcularValorTotal() {
+        double total = 0.0;
+        for (int i = 0; i < quantidadeServicos; i++) {
+            total += servicos[i].getValor();
+        }
+        return total;
+    }
+
+    public void exibirServicos() {
+        for (int i = 0; i < quantidadeServicos; i++) {
+            Servico s = servicos[i];
+            System.out.printf("%s: R$ %.2f%n", s.getDescricao(), s.getValor());
+        }
+    }
+
+    public void exibirResumo() {
+        System.out.println("Cliente: " + nomeCliente);
+        System.out.println("Veiculo: " + veiculo.getModelo() + " - " + veiculo.getPlaca());
+        System.out.println("Servicos:");
+        exibirServicos();
+        System.out.printf("Total: R$ %.2f%n", calcularValorTotal());
+    }
+}
