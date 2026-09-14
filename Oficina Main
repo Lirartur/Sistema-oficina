@@ -1,0 +1,67 @@
+public class GerenciadorOrdens {
+
+    private static final int MAX_ORDENS = 100;
+
+    private OrdemServico[] ordens;
+    private int quantidadeOrdens;
+
+    public GerenciadorOrdens() {
+        this.ordens = new OrdemServico[MAX_ORDENS];
+        this.quantidadeOrdens = 0;
+    }
+
+    public boolean adicionarOrdem(OrdemServico ordem) {
+        if (quantidadeOrdens >= MAX_ORDENS) {
+            System.out.println("Nao eh possível cadastrar mais ordens: capacidade maxima atingida.");
+            return false;
+        }
+        ordens[quantidadeOrdens] = ordem;
+        quantidadeOrdens++;
+        return true;
+    }
+
+    public void listarOrdens() {
+        if (quantidadeOrdens == 0) {
+            System.out.println("Nenhuma ordem cadastrada.");
+            return;
+        }
+        for (int i = 0; i < quantidadeOrdens; i++) {
+            System.out.println("---------------------------------");
+            ordens[i].exibirResumo();
+        }
+        System.out.println("---------------------------------");
+    }
+
+    public void buscarOrdensPorInicioDoNome(String inicio) {
+        boolean encontrou = false;
+        String inicioLower = inicio.toLowerCase();
+
+        for (int i = 0; i < quantidadeOrdens; i++) {
+            OrdemServico ordem = ordens[i];
+            if (ordem.getNomeCliente().toLowerCase().startsWith(inicioLower)) {
+                System.out.println("---------------------------------");
+                ordem.exibirResumo();
+                encontrou = true;
+            }
+        }
+
+        if (!encontrou) {
+            System.out.println("Nenhuma ordem encontrada para clientes cujo nome comece com \"" + inicio + "\".");
+        } else {
+            System.out.println("---------------------------------");
+        }
+    }
+
+    public void buscarOrdemPorPlaca(String placa) {
+        for (int i = 0; i < quantidadeOrdens; i++) {
+            OrdemServico ordem = ordens[i];
+            if (ordem.getVeiculo().getPlaca().equalsIgnoreCase(placa)) {
+                System.out.println("---------------------------------");
+                ordem.exibirResumo();
+                System.out.println("---------------------------------");
+                return;
+            }
+        }
+        System.out.println("Nenhuma ordem encontrada para a placa \"" + placa + "\".");
+    }
+}
