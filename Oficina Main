@@ -1,67 +1,140 @@
-public class GerenciadorOrdens {
+import java.util.Scanner;
 
-    private static final int MAX_ORDENS = 100;
+public class OficinaBox42 {
 
-    private OrdemServico[] ordens;
-    private int quantidadeOrdens;
+    private static final Servico[] SERVICOS_DISPONIVEIS = {
+            new Servico("Troca de oleo", 180.00),
+            new Servico("Alinhamento", 100.00),
+            new Servico("Balanceamento", 120.00),
+            new Servico("Troca de pastilhas de freio", 150.00),
+            new Servico("Revisao eletrica", 250.00)
+    };
 
-    public GerenciadorOrdens() {
-        this.ordens = new OrdemServico[MAX_ORDENS];
-        this.quantidadeOrdens = 0;
+    private static Scanner scanner = new Scanner(System.in);
+    private static GerenciadorOrdens gerenciador = new GerenciadorOrdens();
+
+    public static void main(String[] args) {
+        int opcao;
+
+        do {
+            exibirMenu();
+            opcao = lerInteiro("Escolha uma opcao: ");
+
+            switch (opcao) {
+                case 1:
+                    cadastrarOrdem();
+                    break;
+                case 2:
+                    gerenciador.listarOrdens();
+                    break;
+                case 3:
+                    buscarPorNome();
+                    break;
+                case 4:
+                    buscarPorPlaca();
+                    break;
+                case 5:
+                    System.out.println("Saindo");
+                    break;
+                default:
+                    System.out.println("Opcao invalida. Tente novamente.");
+            }
+
+            System.out.println();
+        } while (opcao != 5);
+
+        scanner.close();
     }
 
-    public boolean adicionarOrdem(OrdemServico ordem) {
-        if (quantidadeOrdens >= MAX_ORDENS) {
-            System.out.println("Nao eh possível cadastrar mais ordens: capacidade maxima atingida.");
-            return false;
+    private static void exibirMenu() {
+        System.out.println("MENU");
+        System.out.println("1. Cadastrar ordem de servico");
+        System.out.println("2. Listar ordens de servico");
+        System.out.println("3. Buscar ordens pelo inicio do nome do cliente");
+        System.out.println("4. Buscar ordem pela placa do veiculo");
+        System.out.println("5. Sair");
+    }
+
+    private static void cadastrarOrdem() {
+        System.out.print("Nome do cliente: ");
+        String nomeCliente = scanner.nextLine();
+
+        System.out.print("Placa do veiculo: ");
+        String placa = scanner.nextLine();
+
+        System.out.print("Modelo: ");
+        String modelo = scanner.nextLine();
+
+        int ano = lerInteiro("Ano: ");
+
+        Veiculo veiculo = new Veiculo(placa, modelo, ano);
+        OrdemServico ordem = new OrdemServico(nomeCliente, veiculo);
+
+        boolean continuarAdicionando = true;
+        boolean adicionouAoMenosUm = false;
+
+        while (continuarAdicionando) {
+            exibirServicosDisponiveis();
+            int escolha = lerInteiro("Escolha um servico: ");
+
+            if (escolha >= 1 && escolha <= SERVICOS_DISPONIVEIS.length) {
+                Servico escolhido = SERVICOS_DISPONIVEIS[escolha - 1];
+                boolean adicionado = ordem.adicionarServico(new Servico(escolhido.getDescricao(), escolhido.getValor()));
+                if (adicionado) {
+                    adicionouAoMenosUm = true;
+                }
+            } else {
+                System.out.println("Opcao de serviço invalida.");
+            }
+
+            System.out.print("Deseja adicionar outro servico? (S/N): ");
+            String resposta = scanner.nextLine();
+            continuarAdicionando = resposta.equalsIgnoreCase("S");
         }
-        ordens[quantidadeOrdens] = ordem;
-        quantidadeOrdens++;
-        return true;
-    }
 
-    public void listarOrdens() {
-        if (quantidadeOrdens == 0) {
-            System.out.println("Nenhuma ordem cadastrada.");
+        if (!adicionouAoMenosUm) {
+            System.out.println("Nenhum serviço valido foi adicionado. Ordem nao cadastrada.");
             return;
         }
-        for (int i = 0; i < quantidadeOrdens; i++) {
-            System.out.println("---------------------------------");
-            ordens[i].exibirResumo();
-        }
-        System.out.println("---------------------------------");
-    }
 
-    public void buscarOrdensPorInicioDoNome(String inicio) {
-        boolean encontrou = false;
-        String inicioLower = inicio.toLowerCase();
-
-        for (int i = 0; i < quantidadeOrdens; i++) {
-            OrdemServico ordem = ordens[i];
-            if (ordem.getNomeCliente().toLowerCase().startsWith(inicioLower)) {
-                System.out.println("---------------------------------");
-                ordem.exibirResumo();
-                encontrou = true;
-            }
-        }
-
-        if (!encontrou) {
-            System.out.println("Nenhuma ordem encontrada para clientes cujo nome comece com \"" + inicio + "\".");
-        } else {
-            System.out.println("---------------------------------");
+        boolean cadastrada = gerenciador.adicionarOrdem(ordem);
+        if (cadastrada) {
+            System.out.println();
+            System.out.println("Ordem cadastrada com sucesso.");
+            System.out.println();
+            ordem.exibirResumo();
         }
     }
 
-    public void buscarOrdemPorPlaca(String placa) {
-        for (int i = 0; i < quantidadeOrdens; i++) {
-            OrdemServico ordem = ordens[i];
-            if (ordem.getVeiculo().getPlaca().equalsIgnoreCase(placa)) {
-                System.out.println("---------------------------------");
-                ordem.exibirResumo();
-                System.out.println("---------------------------------");
-                return;
-            }
+    private static void exibirServicosDisponiveis() {
+        System.out.println("Servicos disponiveis:");
+        for (int i = 0; i < SERVICOS_DISPONIVEIS.length; i++) {
+            System.out.print((i + 1) + " - ");
+            SERVICOS_DISPONIVEIS[i].exibirInformacoes();
         }
-        System.out.println("Nenhuma ordem encontrada para a placa \"" + placa + "\".");
     }
-}
+
+    private static void buscarPorNome() {
+        System.out.print("Digite o inicio do nome do cliente: ");
+        String inicio = scanner.nextLine();
+        gerenciador.buscarOrdensPorInicioDoNome(inicio);
+    }
+
+    private static void buscarPorPlaca() {
+        System.out.print("Digite a placa do veiculo: ");
+        String placa = scanner.nextLine();
+        gerenciador.buscarOrdemPorPlaca(placa);
+    }
+
+    private static int lerInteiro(String mensagem) {
+        System.out.print(mensagem);
+        while (!scanner.hasNextInt()) {
+            System.out.println("Entrada invalida. Digite um numero.");
+            System.out.print(mensagem);
+            scanner.next();
+        }
+        int valor = scanner.nextInt();
+        scanner.nextLine(); // consome a quebra de linha pendente
+        return valor;
+    }
+
